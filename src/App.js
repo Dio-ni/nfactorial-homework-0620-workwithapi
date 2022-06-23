@@ -1,9 +1,7 @@
 import {useEffect, useState} from "react";
 import "./App.css";
 import axios from "axios";
-
-const BACKEND_URL = "http://10.65.132.54:3000";
-
+import { TodoistApi } from '@doist/todoist-api-typescript'
 /*
 * Plan:
 *   1. Define backend url
@@ -16,6 +14,10 @@ const BACKEND_URL = "http://10.65.132.54:3000";
 * */
 
 function App() {
+
+  const BACKEND_URL = new TodoistApi('d5e3835c1f7cf13f35b7c2fee33c2bf409128b24')
+
+  
   const [itemToAdd, setItemToAdd] = useState("");
   const [items, setItems] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -25,16 +27,38 @@ function App() {
   };
 
   const handleAddItem = () => {
-    axios.post(`${BACKEND_URL}/todos`, {
-        label:itemToAdd,
-        done: false
-    }).then((response) => {
-        setItems([ ...items, response.data])
-    })
+  //   BACKEND_URL.addTask({
+  //     content: 'Buy Milk'
+  // })
+  //     .then((task) => console.log(task))
+  //     .catch((error) => console.log(error))
+    BACKEND_URL.addTask({
+      content:itemToAdd,
+      })
+      .then((task) => {
+        setItems([ ...items, task])
+      })
+    .catch((error) => console.log(error))
     setItemToAdd("");
-  };
+          //setItemToAdd("");
+
+  //   axios.post(`${BACKEND_URL}/todos`, {
+  //       label:itemToAdd,
+  //       done: false
+  //   }).then((response) => {
+  //       setItems([ ...items, response.data])
+  //   })
+  //   setItemToAdd("");
+  // };
 
 
+
+//   api.addTask({
+//     content: 'Buy Milk',
+// })
+//     .then((task) => console.log(task))
+//     .catch((error) => console.log(error))
+    }
   const toggleItemDone = ({ id, done }) => {
       axios.put(`${BACKEND_URL}/todos/${id}`, {
           done: !done
@@ -67,10 +91,18 @@ function App() {
   };
 
   useEffect(() => {
-      console.log(searchValue)
-      axios.get(`${BACKEND_URL}/todos/?filter=${searchValue}`).then((response) => {
-          setItems(response.data);
+
+      BACKEND_URL.getTasks()
+      .then((tasks) => {
+        setItems(tasks)
+        console.log(tasks)
       })
+      .catch((error) => console.log(error))
+
+      // axios.get(`${BACKEND_URL}`).then((response) => {
+      //     // //setItems(response.data);
+          
+      // })
   }, [searchValue])
 
 
@@ -103,7 +135,7 @@ function App() {
                   className="todo-list-item-label"
                   onClick={() => toggleItemDone(item)}
                 >
-                  {item.label}
+                  {item.content}
                 </span>
 
                 <button
